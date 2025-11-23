@@ -1,3 +1,5 @@
+package server;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
@@ -6,11 +8,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ClientHandler implements Runnable {
     private final Socket socket;
     private final List<ClientHandler> clients;
-    private final LinkedBlockingQueue<String> broadcastQueue;
+    protected final LinkedBlockingQueue<String> broadcastQueue;
     private final LinkedBlockingQueue<String> logQueue;
     private BufferedReader reader;
     private PrintWriter writer;
-    private String name;
+    protected String name;
     private volatile long lastActivityTime;
 
     public ClientHandler(Socket socket, List<ClientHandler> clients,
@@ -76,4 +78,9 @@ public class ClientHandler implements Runnable {
     }
 
     public void sendMessage(String msg) { writer.println(msg); }
+    public void changeName(String newName) throws InterruptedException {
+        broadcastQueue.put(name + " is now known as " + newName);
+        name = newName;
+    }
+
 }
