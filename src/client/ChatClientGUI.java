@@ -5,19 +5,44 @@ import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * A simple Swing-based chat client that connects to a TCP chat server.
+ * The client displays incoming messages in a GUI window and allows the user
+ * to send messages via a text field and a button.
+ */
 public class ChatClientGUI {
 
+    /** Main application window. */
     private JFrame frame;
+
+    /** Text area that displays received chat messages. */
     private JTextArea chatArea;
+
+    /** Text field where a user types outgoing messages. */
     private JTextField inputField;
+
+    /** Button used to send a message. */
     private JButton sendButton;
+
+    /** Writer for sending data to the server. */
     private PrintWriter writer;
+
+    /** The socket used to communicate with the server. */
     private Socket socket;
 
+    /**
+     * Application entry point.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ChatClientGUI().start());
     }
 
+    /**
+     * Initializes GUI, connects to the server, starts the listening thread,
+     * and configures sending of messages.
+     */
     public void start() {
         setupGUI();
 
@@ -34,15 +59,19 @@ public class ChatClientGUI {
             writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Poslat jméno serveru
+            // Send username to server
             writer.println(name);
 
-            // Vlákno pro příjem zpráv od serveru
+            /**
+             * Thread that continuously reads messages from the server.
+             * Handles server commands such as /disconnect.
+             */
             new Thread(() -> {
                 String msg;
                 try {
                     while ((msg = reader.readLine()) != null) {
-                        // Pokud server poslal /disconnect → ukončit klienta
+
+                        // Server requests that the client disconnects
                         if (msg.equals("/disconnect")) {
                             JOptionPane.showMessageDialog(frame,
                                     "You have been disconnected from the server.",
@@ -61,7 +90,7 @@ public class ChatClientGUI {
                 }
             }).start();
 
-            // Odesílání zpráv
+            // Attach send listeners
             sendButton.addActionListener(e -> sendMessage());
             inputField.addActionListener(e -> sendMessage());
 
@@ -71,6 +100,10 @@ public class ChatClientGUI {
         }
     }
 
+    /**
+     * Builds the Swing GUI layout including the chat display area,
+     * input field, and send button.
+     */
     private void setupGUI() {
         frame = new JFrame("Chat Client GUI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -94,15 +127,20 @@ public class ChatClientGUI {
         frame.setVisible(true);
     }
 
+    /**
+     * Sends the text currently typed in the input field to the server.
+     * If the user types "/quit", the command is also forwarded to the server
+     * and the client begins shutdown.
+     */
     private void sendMessage() {
         String msg = inputField.getText().trim();
         if (!msg.isEmpty()) {
             writer.println(msg);
             inputField.setText("");
 
-            // Pokud klient sám chce ukončit spojení
+            // Client requests to close connection
             if (msg.equalsIgnoreCase("/quit")) {
-                writer.println("/quit"); // poslat serveru
+                writer.println("/quit");
             }
         }
     }

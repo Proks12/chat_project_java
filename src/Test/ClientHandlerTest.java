@@ -31,7 +31,7 @@ class ClientHandlerTest {
         assertEquals("NewName", handler.getName());
     }
 
-    // Mock třída, jen pro test (nepoužívá socket)
+    // Mock třída, jen pro test
     static class ClientHandlerMock extends ClientHandler {
         public ClientHandlerMock(List<ClientHandler> clients, LinkedBlockingQueue<String> broadcastQueue,
                                  LinkedBlockingQueue<String> logQueue, String initialName) {
@@ -41,7 +41,7 @@ class ClientHandlerTest {
 
         @Override
         public void run() {
-            // nic neděláme
+
         }
     }
 }
