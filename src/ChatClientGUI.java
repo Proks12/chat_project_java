@@ -10,6 +10,7 @@ public class ChatClientGUI {
     private JTextField inputField;
     private JButton sendButton;
     private PrintWriter writer;
+    private Socket socket;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ChatClientGUI().start());
@@ -27,18 +28,29 @@ public class ChatClientGUI {
         }
 
         try {
-            Socket socket = new Socket(host, port);
+            socket = new Socket(host, port);
             writer = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             // Poslat jméno serveru
             writer.println(name);
 
-            // Vlákno pro příjem zpráv
+            // Vlákno pro příjem zpráv od serveru
             new Thread(() -> {
                 String msg;
                 try {
                     while ((msg = reader.readLine()) != null) {
+                        // Pokud server poslal /disconnect → ukončit klienta
+                        if (msg.equals("/disconnect")) {
+                            JOptionPane.showMessageDialog(frame,
+                                    "You have been disconnected from the server.",
+                                    "Disconnected",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                            socket.close();
+                            frame.dispose();
+                            break;
+                        }
+
                         chatArea.append(msg + "\n");
                         chatArea.setCaretPosition(chatArea.getDocument().getLength());
                     }
@@ -52,7 +64,8 @@ public class ChatClientGUI {
             inputField.addActionListener(e -> sendMessage());
 
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(frame, "Cannot connect to server: " + e.getMessage());
+            JOptionPane.showMessageDialog(frame, "Cannot connect to server: " + e.getMessage(),
+                    "Connection Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -84,6 +97,11 @@ public class ChatClientGUI {
         if (!msg.isEmpty()) {
             writer.println(msg);
             inputField.setText("");
+
+            // Pokud klient sám chce ukončit spojení
+            if (msg.equalsIgnoreCase("/quit")) {
+                writer.println("/quit"); // poslat serveru
+            }
         }
     }
 }

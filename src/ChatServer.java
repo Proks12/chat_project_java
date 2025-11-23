@@ -26,8 +26,8 @@ public class ChatServer {
         try (FileInputStream fis = new FileInputStream("config/server.properties")) {
             props.load(fis);
             PORT = Integer.parseInt(props.getProperty("port", "12345"));
-            INACTIVITY_LIMIT_MS = Long.parseLong(props.getProperty("inactivity_limit_ms", "300000"));
-            LOG_MAX_SIZE = Long.parseLong(props.getProperty("log_max_size", "5000000"));
+            INACTIVITY_LIMIT_MS = Long.parseLong(props.getProperty("inactivity_limit_ms", "300000").trim());
+            LOG_MAX_SIZE = Long.parseLong(props.getProperty("log_max_size", "5000000").trim());
         } catch (IOException e) {
             System.out.println("Cannot load config file, using defaults.");
             PORT = 12345;
@@ -41,7 +41,8 @@ public class ChatServer {
 
         Thread broadcaster = new Thread(new BroadcastWorker(clients, broadcastQueue));
         Thread logger = new Thread(new LoggerWorker(logQueue));
-        Thread timeoutWatcher = new Thread(new TimeoutWatcher(clients, broadcastQueue));
+        Thread timeoutWatcher = new Thread(new TimeoutWatcher(clients, broadcastQueue, logQueue));
+
 
         broadcaster.start();
         logger.start();

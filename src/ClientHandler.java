@@ -41,7 +41,11 @@ public class ClientHandler implements Runnable {
             while ((message = reader.readLine()) != null) {
                 lastActivityTime = System.currentTimeMillis();
 
-                if (message.equalsIgnoreCase("/quit")) break;
+                if (message.equalsIgnoreCase("/quit")) {
+                    writer.println("/disconnect");
+                    break;
+                }
+
                 if (message.equals("/who")) {
                     writer.println("Users online: " + clients.size());
                     continue;
