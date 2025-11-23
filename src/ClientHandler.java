@@ -23,13 +23,8 @@ public class ClientHandler implements Runnable {
         this.lastActivityTime = System.currentTimeMillis();
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public long getLastActivityTime() {
-        return lastActivityTime;
-    }
+    public String getName() { return name; }
+    public long getLastActivityTime() { return lastActivityTime; }
 
     @Override
     public void run() {
@@ -39,7 +34,6 @@ public class ClientHandler implements Runnable {
 
             writer.println("Enter your name:");
             name = reader.readLine();
-
             broadcastQueue.put(name + " joined the chat.");
             logQueue.put(name + " connected.");
 
@@ -47,15 +41,11 @@ public class ClientHandler implements Runnable {
             while ((message = reader.readLine()) != null) {
                 lastActivityTime = System.currentTimeMillis();
 
-                if (message.equalsIgnoreCase("/quit")) {
-                    break;
-                }
-
+                if (message.equalsIgnoreCase("/quit")) break;
                 if (message.equals("/who")) {
                     writer.println("Users online: " + clients.size());
                     continue;
                 }
-
                 if (message.startsWith("/name ")) {
                     String newName = message.substring(6);
                     broadcastQueue.put(name + " is now known as " + newName);
@@ -66,27 +56,20 @@ public class ClientHandler implements Runnable {
                 broadcastQueue.put(name + ": " + message);
                 logQueue.put(name + ": " + message);
             }
-        } catch (IOException | InterruptedException e) {
-        } finally {
-            disconnect();
-        }
+        } catch (IOException | InterruptedException ignored) {}
+        finally { disconnect(); }
     }
 
     private void disconnect() {
         try {
             clients.remove(this);
             if (name != null) {
-                try {
-                    broadcastQueue.put(name + " left the chat.");
-                    logQueue.put(name + " disconnected.");
-                } catch (InterruptedException ignored) {}
+                broadcastQueue.put(name + " left the chat.");
+                logQueue.put(name + " disconnected.");
             }
             if (socket != null) socket.close();
-        } catch (IOException ignored) {
-        }
+        } catch (IOException | InterruptedException ignored) {}
     }
 
-    public void sendMessage(String msg) {
-        writer.println(msg);
-    }
+    public void sendMessage(String msg) { writer.println(msg); }
 }

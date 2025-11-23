@@ -21,8 +21,7 @@ public class LoggerWorker implements Runnable {
                 String msg = logQueue.take();
                 appendToLog(msg);
             }
-        } catch (InterruptedException ignored) {
-        }
+        } catch (InterruptedException ignored) {}
     }
 
     private void appendToLog(String msg) {
