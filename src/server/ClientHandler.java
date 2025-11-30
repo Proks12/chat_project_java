@@ -115,7 +115,7 @@ public class ClientHandler implements Runnable {
      * Disconnects the client, removes it from the clients list, broadcasts the disconnection,
      * logs it, and closes the socket.
      */
-    private void disconnect() {
+    public  void disconnect() {
         try {
             clients.remove(this);
             if (name != null) {

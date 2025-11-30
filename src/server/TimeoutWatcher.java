@@ -44,18 +44,22 @@ public class TimeoutWatcher implements Runnable {
         while (true) {
             try {
                 long now = System.currentTimeMillis();
+
                 for (ClientHandler c : clients) {
                     if (now - c.getLastActivityTime() > ChatServer.INACTIVITY_LIMIT_MS) {
-                        broadcastQueue.put(c.getName() + " was removed due to inactivity.");
-                        logQueue.put(c.getName() + " disconnected due to inactivity.");
+
+                        // pošli mu zprávu jako /quit
                         c.sendMessage("You were disconnected due to inactivity.");
-                        clients.remove(c);
+
+                        // odpojí ho stejně jako /quit
+                        c.disconnect();
                     }
                 }
+
                 Thread.sleep(CHECK_INTERVAL);
-            } catch (Exception ignored) {
-                // Ignore exceptions to keep monitoring running
-            }
+
+            } catch (Exception ignored) {}
         }
     }
+
 }
