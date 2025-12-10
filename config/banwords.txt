@@ -1,0 +1,4 @@
+# Zakázaná slova
+blbec
+idiot
+sprosté
